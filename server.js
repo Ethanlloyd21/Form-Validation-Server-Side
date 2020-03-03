@@ -1,6 +1,9 @@
+`use strict`;
+
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -13,12 +16,12 @@ app.get('/users', (req, res) => {
 
 app.post('/users', async (req, res) => {
     try {
-        
+
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         console.log(salt);
         console.log(hashedPassword)
         const user = {
-            name: req.body.name, 
+            name: req.body.name,
             password: req.body.password
         }
         users.push(user);
@@ -44,3 +47,6 @@ app.post('/users/login', async (req, res) => {
     }
 });
 
+app.listen(PORT, function () {
+    console.log('Server listening on: http://localhost:' + PORT);
+});
