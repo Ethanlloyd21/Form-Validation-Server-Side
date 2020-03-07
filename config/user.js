@@ -6,32 +6,45 @@ function User() { };
 User.prototype = {
 
     find: function (user = null, callback) {
-        if (user) {
-            let field = Number.isInteger(user) ? 'id' : 'email';
+        let field;
+        var test = Number.isInteger(user);
+        if (user === test) {
+            // if user = number return field = id, if user = string return field = username.
+            field = 'id';
         }
-
-        let sql = `SELECT * FROM user ${field} = ?`;
+        else field = 'email';
+        // prepare the sql query
+        let sql = `SELECT * FROM users WHERE ${field} = ?`;
 
         connection.query(sql, user, function (err, res) {
             if (err) throw err
-            callback(res);
+
+            if (result.length) {
+                callback(result[0]);
+            } else {
+                callback(null);
+            }
         });
     },
 
     create: function (body, callback) {
-        let pwd = body.password;
+        var pwd = body.password;
+        // Hash the password before insert it into the database.
         body.password = bcrypt.hashSync(pwd, 10);
 
+        // this array will contain the values of the fields.
         var bind = [];
+        // loop in the attributes of the object and push the values into the bind array.
         for (prop in body) {
-            bind.push(prop);
+            bind.push(body[prop]);
         }
-
-        let sql = `INSERT INTO user(email, password) VALUES (?, ?)`;
-
-        connection.query(sql, bind, function (err, lastId) {
+        // prepare the sql query
+        let sql = `INSERT INTO users(email, password) VALUES (?, ?)`;
+        // call the query give it the sql string and the values (bind array)
+        pool.query(sql, bind, function (err, result) {
             if (err) throw err;
-            callback(lastId);
+            // return the last inserted id. if there is no error
+            callback(result.insertId);
         });
     },
 
